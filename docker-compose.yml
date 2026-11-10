@@ -1,0 +1,24 @@
+services:
+  hadoop:
+    image: apache/hadoop:3.4.0
+    container_name: hadoop-lab
+    hostname: hadoop-lab
+    ports:
+      - "9870:9870"   # NameNode Web UI
+      - "8088:8088"   # YARN ResourceManager Web UI
+    environment:
+      CORE-SITE.XML_fs.defaultFS: hdfs://hadoop-lab:8020
+      HDFS-SITE.XML_dfs.replication: "1"
+      YARN-SITE.XML_yarn.resourcemanager.hostname: hadoop-lab
+      YARN-SITE.XML_yarn.nodemanager.aux-services: mapreduce_shuffle
+      MAPRED-SITE.XML_mapreduce.framework.name: yarn
+    command: >
+      bash -c "
+      ([ -d /tmp/hadoop-hadoop/dfs/name ] || hdfs namenode -format -nonInteractive) &&
+      hdfs --daemon start namenode &&
+      hdfs --daemon start datanode &&
+      yarn --daemon start resourcemanager &&
+      yarn --daemon start nodemanager &&
+      tail -f /dev/null"
+    volumes:
+      - ./datos:/workspace
